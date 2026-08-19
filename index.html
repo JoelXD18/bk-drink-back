@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  
+  <!-- Importante para iPhone -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Burger King">
+  <meta name="theme-color" content="#D62300">
+  
+  <!-- Icono de la app (usa tu icon.png) -->
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="icon" href="icon.png">
+  
+  <title>Burger King</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+  <style>
+    :root {
+      --bk-red: #D62300;
+      --bk-orange: #FF8732;
+      --bk-brown: #502314;
+      --bk-cream: #F5EBDC;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      user-select: none;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* ========== PANTALLA INICIAL ========== */
+    #setup {
+      position: fixed;
+      inset: 0;
+      background: var(--bk-cream);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 30px 24px;
+      z-index: 100;
+    }
+
+    #setup.hidden {
+      display: none;
+    }
+
+    .setup-box {
+      width: 100%;
+      max-width: 340px;
+      background: white;
+      border: 3px solid var(--bk-brown);
+      border-radius: 24px;
+      padding: 28px 22px;
+      box-shadow: 0 8px 0 var(--bk-brown);
+      text-align: center;
+    }
+
+    .setup-box h1 {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--bk-red);
+      margin-bottom: 8px;
+    }
+
+    .setup-box p {
+      font-size: 14px;
+      color: #6b5a4a;
+      margin-bottom: 22px;
+      line-height: 1.4;
+    }
+
+    .setup-box input {
+      width: 100%;
+      padding: 16px;
+      border: 2.5px solid var(--bk-brown);
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 18px;
+      outline: none;
+      background: #fff;
+    }
+
+    .setup-box input:focus {
+      border-color: var(--bk-red);
+      box-shadow: 0 0 0 4px rgba(214, 35, 0, 0.15);
+    }
+
+    .setup-box button {
+      width: 100%;
+      padding: 16px;
+      background: var(--bk-orange);
+      color: var(--bk-brown);
+      border: 3px solid var(--bk-brown);
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 900;
+      text-transform: uppercase;
+      box-shadow: 0 5px 0 var(--bk-brown);
+      cursor: pointer;
+    }
+
+    .setup-box button:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 var(--bk-brown);
+    }
+
+    /* ========== HOME ========== */
+    #home {
+      position: fixed;
+      inset: 0;
+      display: none;
+      background: #000;
+    }
+
+    #home.active {
+      display: block;
+    }
+
+    #home img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+    }
+
+    #tap-zone {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 28%;
+      height: 14%;
+      z-index: 10;
+    }
+
+    /* ========== PANTALLA QR ========== */
+    #qr-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bk-cream);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 50;
+    }
+
+    #qr-screen.active {
+      display: flex;
+    }
+
+    .qr-card {
+      background: white;
+      border: 3px solid var(--bk-brown);
+      border-radius: 24px;
+      padding: 28px 22px;
+      width: 100%;
+      max-width: 340px;
+      box-shadow: 0 8px 0 var(--bk-brown);
+      text-align: center;
+    }
+
+    .qr-card h2 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--bk-brown);
+      margin-bottom: 6px;
+      letter-spacing: -0.3px;
+    }
+
+    .qr-card .subtitle {
+      font-size: 13px;
+      color: #7a6650;
+      margin-bottom: 22px;
+    }
+
+    #qrcode {
+      width: 240px;
+      height: 240px;
+      margin: 0 auto 20px;
+      background: white;
+      border: 3px solid var(--bk-brown);
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      padding: 10px;
+    }
+
+    #qr-text {
+      font-size: 11px;
+      font-family: monospace;
+      color: #5c4630;
+      background: #f8efd9;
+      border: 2px solid #d9c49a;
+      border-radius: 10px;
+      padding: 10px 12px;
+      word-break: break-all;
+      text-align: left;
+      margin-bottom: 20px;
+    }
+
+    .btn-back {
+      width: 100%;
+      padding: 15px;
+      background: var(--bk-orange);
+      color: var(--bk-brown);
+      border: 3px solid var(--bk-brown);
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 800;
+      box-shadow: 0 5px 0 var(--bk-brown);
+      cursor: pointer;
+    }
+
+    .btn-back:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 var(--bk-brown);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== SETUP ===== -->
+  <div id="setup">
+    <div class="setup-box">
+      <h1>Burger King</h1>
+      <p>Introduce el número de establecimiento</p>
+      <input id="est-input" type="text" inputmode="numeric" maxlength="12" placeholder="Ej. 99999" autocomplete="off">
+      <button id="save-est">Continuar</button>
+    </div>
+  </div>
+
+  <!-- ===== HOME ===== -->
+  <div id="home">
+    <img src="home.png" alt="Burger King" id="home-img">
+    <div id="tap-zone"></div>
+  </div>
+
+  <!-- ===== QR ===== -->
+  <div id="qr-screen">
+    <div class="qr-card">
+      <h2>Código de acceso</h2>
+      <p class="subtitle">Escanea este código en el punto de control</p>
+      
+      <div id="qrcode"></div>
+      <div id="qr-text"></div>
+      
+      <button class="btn-back" id="btn-back">Volver</button>
+    </div>
+  </div>
+
+  <script>
+    const IDENTIFICADOR = "104910993";
+    const TOKEN = "9b64665a0893e6497cc160a3f2f4c928";
+
+    const setupEl    = document.getElementById("setup");
+    const homeEl     = document.getElementById("home");
+    const qrScreen   = document.getElementById("qr-screen");
+    const estInput   = document.getElementById("est-input");
+    const saveBtn    = document.getElementById("save-est");
+    const tapZone    = document.getElementById("tap-zone");
+    const btnBack    = document.getElementById("btn-back");
+    const qrcodeEl   = document.getElementById("qrcode");
+    const qrTextEl   = document.getElementById("qr-text");
+
+    const pad = n => String(n).padStart(2, "0");
+
+    function stamp(date) {
+      return (
+        date.getFullYear() +
+        pad(date.getMonth() + 1) +
+        pad(date.getDate()) +
+        pad(date.getHours()) +
+        pad(date.getMinutes()) +
+        pad(date.getSeconds())
+      );
+    }
+
+    function getEstablishment() {
+      return sessionStorage.getItem("bk_establishment");
+    }
+
+    function setEstablishment(value) {
+      sessionStorage.setItem("bk_establishment", value);
+    }
+
+    function init() {
+      const saved = getEstablishment();
+      if (saved) {
+        setupEl.classList.add("hidden");
+        homeEl.classList.add("active");
+      } else {
+        setupEl.classList.remove("hidden");
+        homeEl.classList.remove("active");
+        setTimeout(() => estInput.focus(), 300);
+      }
+    }
+
+    saveBtn.addEventListener("click", () => {
+      const value = estInput.value.trim();
+      if (!value) {
+        estInput.focus();
+        return;
+      }
+      setEstablishment(value);
+      setupEl.classList.add("hidden");
+      homeEl.classList.add("active");
+    });
+
+    estInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") saveBtn.click();
+    });
+
+    tapZone.addEventListener("click", () => {
+      const establishment = getEstablishment();
+      if (!establishment) {
+        location.reload();
+        return;
+      }
+
+      const now = new Date();
+      const qrData = `${establishment},${IDENTIFICADOR},${stamp(now)},${TOKEN}`;
+
+      qrcodeEl.innerHTML = "";
+
+      new QRCode(qrcodeEl, {
+        text: qrData,
+        width: 220,
+        height: 220,
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      qrTextEl.textContent = qrData;
+
+      homeEl.classList.remove("active");
+      qrScreen.classList.add("active");
+    });
+
+    btnBack.addEventListener("click", () => {
+      qrScreen.classList.remove("active");
+      homeEl.classList.add("active");
+    });
+
+    init();
+  </script>
+</body>
+</html>
